@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Organize suas tarefas em uma lista simples que fica salva no seu dispositivo."
+    />
+    <title>Minha lista de tarefas</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: #242338;
+        background: #f5f5fb;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-optical-sizing: auto;
+        font-weight: 400;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        min-height: 100vh;
+        margin: 0;
+        padding: 64px 20px;
+        background:
+          radial-gradient(ellipse at 50% 0, rgb(226 224 255 / 72%), transparent 48%),
+          #f5f5fb;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        width: min(100%, 620px);
+        margin: 0 auto;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 14px;
+        background: #6658d3;
+        box-shadow: 0 6px 14px rgb(79 66 180 / 22%);
+        color: #fff;
+      }
+
+      .brand-mark svg {
+        width: 23px;
+        height: 23px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2;
+      }
+
+      .brand-name {
+        margin: 0;
+        color: #4e49a2;
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+      }
+
+      .card {
+        overflow: hidden;
+        border: 1px solid #e9e8f1;
+        border-radius: 22px;
+        background: #fff;
+        box-shadow: 0 18px 55px rgb(42 37 91 / 9%);
+      }
+
+      .card-header {
+        padding: 32px 36px 25px;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: #7772b7;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        color: #25243b;
+        font-size: clamp(1.8rem, 6vw, 2.25rem);
+        letter-spacing: -0.055em;
+        line-height: 1.15;
+      }
+
+      .subtitle {
+        margin: 10px 0 0;
+        color: #777687;
+        font-size: 0.96rem;
+        line-height: 1.55;
+      }
+
+      .task-form {
+        display: flex;
+        gap: 10px;
+        padding: 0 36px 28px;
+      }
+
+      .task-input {
+        width: 100%;
+        min-width: 0;
+        height: 50px;
+        padding: 0 16px;
+        border: 1px solid #e3e2ec;
+        border-radius: 11px;
+        outline: none;
+        background: #fcfcfe;
+        color: #29283e;
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .task-input::placeholder {
+        color: #a4a2b2;
+      }
+
+      .task-input:focus {
+        border-color: #8176df;
+        box-shadow: 0 0 0 3px rgb(102 88 211 / 13%);
+      }
+
+      .add-button {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 50px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 11px;
+        background: #6658d3;
+        color: #fff;
+        font-size: 0.91rem;
+        font-weight: 650;
+        transition: background 160ms ease, transform 160ms ease;
+      }
+
+      .add-button:hover {
+        transform: translateY(-1px);
+        background: #5749c1;
+      }
+
+      .add-button:active {
+        transform: translateY(0);
+      }
+
+      .add-button svg {
+        width: 18px;
+        height: 18px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-width: 2;
+      }
+
+      .list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 64px;
+        padding: 0 36px;
+        border-top: 1px solid #f0eff5;
+        border-bottom: 1px solid #f0eff5;
+      }
+
+      .list-title {
+        margin: 0;
+        color: #39384d;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .task-count {
+        display: inline-flex;
+        align-items: center;
+        min-height: 25px;
+        padding: 0 9px;
+        border-radius: 99px;
+        background: #f0effb;
+        color: #6259b5;
+        font-size: 0.76rem;
+        font-weight: 650;
+        white-space: nowrap;
+      }
+
+      .filters {
+        display: flex;
+        gap: 5px;
+        padding: 18px 36px 6px;
+      }
+
+      .filter-button {
+        min-height: 34px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #797888;
+        font-size: 0.83rem;
+        font-weight: 600;
+        transition: background 160ms ease, color 160ms ease;
+      }
+
+      .filter-button:hover {
+        background: #f6f5fb;
+        color: #4f49a3;
+      }
+
+      .filter-button[aria-pressed="true"] {
+        background: #efedfc;
+        color: #554ab9;
+      }
+
+      .task-list {
+        min-height: 122px;
+        padding: 7px 36px 18px;
+      }
+
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        min-height: 61px;
+        border-bottom: 1px solid #f1f0f5;
+        animation: arrive 180ms ease both;
+      }
+
+      .task-item:last-child {
+        border-bottom: 0;
+      }
+
+      @keyframes arrive {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .complete-checkbox {
+        display: grid;
+        flex: none;
+        width: 21px;
+        height: 21px;
+        place-items: center;
+        padding: 0;
+        border: 1.5px solid #cbc9d8;
+        border-radius: 7px;
+        background: #fff;
+        color: transparent;
+        transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+      }
+
+      .complete-checkbox:hover {
+        border-color: #8176df;
+      }
+
+      .complete-checkbox[aria-pressed="true"] {
+        border-color: #6658d3;
+        background: #6658d3;
+        color: #fff;
+      }
+
+      .complete-checkbox svg {
+        width: 13px;
+        height: 13px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 2.4;
+      }
+
+      .task-text {
+        flex: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: #37364a;
+        font-size: 0.94rem;
+        line-height: 1.5;
+      }
+
+      .task-item.is-complete .task-text {
+        color: #a3a1ae;
+        text-decoration: line-through;
+        text-decoration-color: #b9b7c5;
+      }
+
+      .delete-button {
+        display: grid;
+        flex: none;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 9px;
+        background: transparent;
+        color: #aaa8b7;
+        opacity: 0;
+        transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+      }
+
+      .task-item:hover .delete-button,
+      .delete-button:focus-visible {
+        opacity: 1;
+      }
+
+      .delete-button:hover {
+        background: #fff0f0;
+        color: #cf5555;
+      }
+
+      .delete-button svg {
+        width: 17px;
+        height: 17px;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.7;
+      }
+
+      .empty-state {
+        display: flex;
+        min-height: 122px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        color: #9896a6;
+        text-align: center;
+      }
+
+      .empty-state svg {
+        width: 26px;
+        height: 26px;
+        margin-bottom: 9px;
+        fill: none;
+        stroke: #aaa6d6;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+      }
+
+      .empty-state p {
+        margin: 0;
+        font-size: 0.88rem;
+      }
+
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 17px 36px;
+        border-top: 1px solid #f0eff5;
+        color: #9896a5;
+        font-size: 0.78rem;
+      }
+
+      .card-footer p {
+        margin: 0;
+      }
+
+      .storage-note {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .storage-note svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: #8a83cf;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.7;
+      }
+
+      .notice {
+        margin: 14px 0 0;
+        color: #a54242;
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+
+      .notice:empty {
+        display: none;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        clip-path: inset(50%);
+      }
+
+      :focus-visible {
+        outline: 3px solid rgb(102 88 211 / 38%);
+        outline-offset: 3px;
+      }
+
+      @media (max-width: 560px) {
+        body {
+          padding: 34px 14px;
+        }
+
+        .brand {
+          margin-bottom: 20px;
+        }
+
+        .card {
+          border-radius: 17px;
+        }
+
+        .card-header {
+          padding: 27px 22px 22px;
+        }
+
+        .task-form {
+          gap: 8px;
+          padding: 0 22px 23px;
+        }
+
+        .task-input {
+          padding: 0 12px;
+        }
+
+        .add-button {
+          gap: 6px;
+          padding: 0 13px;
+          font-size: 0.85rem;
+        }
+
+        .list-header {
+          padding: 0 22px;
+        }
+
+        .filters {
+          padding: 15px 22px 5px;
+        }
+
+        .filter-button {
+          padding: 0 10px;
+          font-size: 0.79rem;
+        }
+
+        .task-list {
+          padding-right: 22px;
+          padding-left: 22px;
+        }
+
+        .delete-button {
+          opacity: 1;
+        }
+
+        .card-footer {
+          align-items: flex-start;
+          padding: 15px 22px;
+          font-size: 0.72rem;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <div class="brand" aria-label="Organiza">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="m5 12 4 4L19 6" />
+          </svg>
+        </span>
+        <p class="brand-name">organiza</p>
+      </div>
+
+      <section class="card" aria-labelledby="page-title">
+        <header class="card-header">
+          <p class="eyebrow">Seu espaço, suas prioridades</p>
+          <h1 id="page-title">Lista de tarefas</h1>
+          <p class="subtitle">Um passo de cada vez. O importante é seguir em frente.</p>
+        </header>
+
+        <form class="task-form" id="task-form">
+          <label class="visually-hidden" for="task-input">Nova tarefa</label>
+          <input
+            class="task-input"
+            id="task-input"
+            name="task"
+            type="text"
+            maxlength="120"
+            placeholder="O que você precisa fazer?"
+            autocomplete="off"
+            required
+          />
+          <button class="add-button" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Adicionar
+          </button>
+        </form>
+
+        <div class="list-header">
+          <h2 class="list-title">Minhas tarefas</h2>
+          <span class="task-count" id="task-count">0 tarefas</span>
+        </div>
+
+        <nav class="filters" aria-label="Filtrar tarefas">
+          <button class="filter-button" type="button" data-filter="all" aria-pressed="true">
+            Todas
+          </button>
+          <button class="filter-button" type="button" data-filter="pending" aria-pressed="false">
+            Pendentes
+          </button>
+          <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">
+            Concluídas
+          </button>
+        </nav>
+
+        <ul class="task-list" id="task-list" aria-label="Tarefas"></ul>
+        <p class="visually-hidden" id="announcer" aria-live="polite" aria-atomic="true"></p>
+        <footer class="card-footer">
+          <p>Feito com calma, uma tarefa por vez.</p>
+          <span class="storage-note">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H19v16H7.5A2.5 2.5 0 0 0 5 21.5z" />
+              <path d="M5 5.5v16M9 7h6" />
+            </svg>
+            Salvo neste dispositivo
+          </span>
+        </footer>
+      </section>
+
+      <p class="notice" id="notice" role="status" aria-live="polite"></p>
+
+      <script>
+        (() => {
+          const storageKey = "organiza-tarefas";
+          const taskForm = document.getElementById("task-form");
+          const taskInput = document.getElementById("task-input");
+          const taskList = document.getElementById("task-list");
+          const taskCount = document.getElementById("task-count");
+          const notice = document.getElementById("notice");
+          const announcer = document.getElementById("announcer");
+          const filterButtons = document.querySelectorAll(".filter-button");
+
+          let activeFilter = "all";
+          let tasks = [];
+
+          function isTaskList(value) {
+            return (
+              Array.isArray(value) &&
+              value.every(
+                (task) =>
+                  task &&
+                  typeof task.id === "string" &&
+                  typeof task.text === "string" &&
+                  typeof task.completed === "boolean"
+              )
+            );
+          }
+
+          function loadTasks() {
+            try {
+              const savedTasks = localStorage.getItem(storageKey);
+              if (savedTasks === null) return [];
+
+              const parsedTasks = JSON.parse(savedTasks);
+              if (!isTaskList(parsedTasks)) {
+                throw new Error("Os dados salvos não têm o formato esperado.");
+              }
+              return parsedTasks;
+            } catch (error) {
+              notice.textContent =
+                "Não foi possível carregar as tarefas salvas. Você ainda pode usar a lista nesta sessão.";
+              console.error("Erro ao carregar tarefas:", error);
+              return [];
+            }
+          }
+
+          function saveTasks() {
+            try {
+              localStorage.setItem(storageKey, JSON.stringify(tasks));
+              notice.textContent = "";
+            } catch (error) {
+              notice.textContent =
+                "Não foi possível salvar as alterações neste dispositivo. Verifique as permissões de armazenamento do navegador.";
+              console.error("Erro ao salvar tarefas:", error);
+            }
+          }
+
+          function updateCount() {
+            const pendingCount = tasks.filter((task) => !task.completed).length;
+            taskCount.textContent = `${pendingCount} ${
+              pendingCount === 1 ? "tarefa pendente" : "tarefas pendentes"
+            }`;
+          }
+
+          function createTaskItem(task) {
+            const item = document.createElement("li");
+            item.className = `task-item${task.completed ? " is-complete" : ""}`;
+
+            const completeButton = document.createElement("button");
+            completeButton.className = "complete-checkbox";
+            completeButton.type = "button";
+            completeButton.setAttribute("aria-pressed", String(task.completed));
+            completeButton.setAttribute(
+              "aria-label",
+              task.completed ? `Reabrir tarefa: ${task.text}` : `Concluir tarefa: ${task.text}`
+            );
+            completeButton.innerHTML =
+              '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 8 3.2 3.2L13 4.5" /></svg>';
+            completeButton.addEventListener("click", () => {
+              task.completed = !task.completed;
+              saveTasks();
+              renderTasks();
+              announcer.textContent = task.completed
+                ? `Tarefa concluída: ${task.text}`
+                : `Tarefa reaberta: ${task.text}`;
+            });
+
+            const text = document.createElement("span");
+            text.className = "task-text";
+            text.textContent = task.text;
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.type = "button";
+            deleteButton.setAttribute("aria-label", `Excluir tarefa: ${task.text}`);
+            deleteButton.innerHTML =
+              '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h14l1-13M9 7V4h6v3" /></svg>';
+            deleteButton.addEventListener("click", () => {
+              tasks = tasks.filter((entry) => entry.id !== task.id);
+              saveTasks();
+              renderTasks();
+              announcer.textContent = `Tarefa excluída: ${task.text}`;
+            });
+
+            item.append(completeButton, text, deleteButton);
+            return item;
+          }
+
+          function renderTasks() {
+            const visibleTasks = tasks.filter((task) => {
+              if (activeFilter === "pending") return !task.completed;
+              if (activeFilter === "completed") return task.completed;
+              return true;
+            });
+
+            taskList.replaceChildren();
+            updateCount();
+
+            if (visibleTasks.length === 0) {
+              const emptyItem = document.createElement("li");
+              emptyItem.className = "empty-state";
+              emptyItem.innerHTML =
+                '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M9 3h6v3H9zM6 5H5v16h14V5h-1M8 12l2.5 2.5L16 9" /></svg>';
+              const emptyText = document.createElement("p");
+              emptyText.textContent =
+                activeFilter === "completed"
+                  ? "Suas tarefas concluídas vão aparecer aqui."
+                  : activeFilter === "pending"
+                    ? "Tudo em dia! Nenhuma tarefa pendente."
+                    : "Sua lista está vazia. Que tal adicionar uma tarefa?";
+              emptyItem.appendChild(emptyText);
+              taskList.appendChild(emptyItem);
+              return;
+            }
+
+            visibleTasks.forEach((task) => taskList.appendChild(createTaskItem(task)));
+          }
+
+          taskForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const text = taskInput.value.trim();
+            if (!text) {
+              taskInput.value = "";
+              taskInput.focus();
+              return;
+            }
+
+            tasks.unshift({
+              id: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`,
+              text,
+              completed: false,
+            });
+            saveTasks();
+            renderTasks();
+            taskInput.value = "";
+            taskInput.focus();
+            announcer.textContent = `Tarefa adicionada: ${text}`;
+          });
+
+          filterButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              activeFilter = button.dataset.filter;
+              filterButtons.forEach((filterButton) => {
+                filterButton.setAttribute(
+                  "aria-pressed",
+                  String(filterButton === button)
+                );
+              });
+              renderTasks();
+            });
+          });
+
+          tasks = loadTasks();
+          renderTasks();
+        })();
+      </script>
+    </main>
+  </body>
+</html>
